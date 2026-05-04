@@ -1,0 +1,75 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Solar Irrigation — Posizione",
+        "description": "Inserisci la posizione geografica e l'orientamento del tuo giardino.",
+        "data": {
+          "name": "Nome installazione",
+          "latitude": "Latitudine",
+          "longitude": "Longitudine",
+          "north_offset": "Offset nord (gradi)"
+        }
+      },
+      "buildings": {
+        "title": "Solar Irrigation — Edifici",
+        "description": "Incolla il JSON degli edifici/ostacoli. Ogni edificio: {\"pts\":[{\"x\":0,\"y\":0},...], \"h\":3.0}. Coordinate in metri dall'origine. Lascia [] se non ci sono ostacoli.",
+        "data": {
+          "buildings": "JSON edifici"
+        }
+      },
+      "zones": {
+        "title": "Solar Irrigation — Zone",
+        "description": "Incolla il JSON delle zone di irrigazione. Ogni zona deve avere: zone_id, name, pts (metri), e opzionalmente: switch_entity, mm_per_min, threshold_mm, kc.",
+        "data": {
+          "zones": "JSON zone"
+        }
+      },
+      "et0": {
+        "title": "Solar Irrigation — Fonte ET0",
+        "description": "Seleziona come ottenere l'evapotraspirazione giornaliera.",
+        "data": {
+          "et0_mode": "Fonte ET0",
+          "et0_fixed": "ET0 fisso (mm/giorno)",
+          "et0_entity": "Entit\u00e0 sensore ET0 o entit\u00e0 meteo"
+        }
+      },
+      "options": {
+        "title": "Solar Irrigation — Opzioni",
+        "description": "Opzioni avanzate di calcolo.",
+        "data": {
+          "irradiance_weighted": "Pondera per irradianza solare (sin\u00b2\u00b7\u2075 elevazione)",
+          "use_dst": "Applica correzione ora legale (UTC+2, apr\u2013ott)"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Formato JSON non valido. Controlla la sintassi."
+    },
+    "abort": {
+      "already_configured": "Solar Irrigation \u00e8 gi\u00e0 configurato."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Solar Irrigation — Impostazioni",
+        "data": {
+          "latitude": "Latitudine",
+          "longitude": "Longitudine",
+          "north_offset": "Offset nord (gradi)",
+          "et0_mode": "Fonte ET0",
+          "et0_fixed": "ET0 fisso (mm/giorno)",
+          "et0_entity": "Entit\u00e0 ET0/meteo",
+          "irradiance_weighted": "Pondera per irradianza solare",
+          "use_dst": "Applica correzione ora legale",
+          "buildings": "JSON edifici",
+          "zones": "JSON zone"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Formato JSON non valido."
+    }
+  }
+}

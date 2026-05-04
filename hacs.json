@@ -1,0 +1,9 @@
+{
+  "name": "Solar Irrigation",
+  "description": "Smart irrigation integration that calculates shadow factors and manages irrigation based on solar position and plant water deficit.",
+  "content_in_root": false,
+  "render_readme": true,
+  "homeassistant": "2024.1.0",
+  "country": [],
+  "iot_class": "calculated"
+}
