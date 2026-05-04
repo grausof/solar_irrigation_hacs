@@ -2,47 +2,47 @@
   "config": {
     "step": {
       "user": {
-        "title": "Solar Irrigation — Location & Zones",
-        "description": "Enter your garden location (defaults to your HA home location). Buildings and zone geometry are configured later via the Lovelace card.",
+        "title": "Solar Irrigation — Location & Setup",
+        "description": "Location defaults to your HA home. Buildings and zone geometry are drawn later in the Lovelace card.",
         "data": {
           "name": "Installation name",
           "latitude": "Latitude",
           "longitude": "Longitude",
-          "north_offset": "North offset (degrees, 0 = map Y axis points North)",
-          "num_zones": "Number of irrigation zones"
+          "north_offset": "North offset (°, 0 = Y axis points North)",
+          "num_zones": "Number of irrigation zones (1–10)",
+          "mm_per_min": "Default flow rate (mm/min) — applies to all zones",
+          "threshold_mm": "Default irrigation threshold (mm deficit)"
         }
       },
       "zone": {
         "title": "Solar Irrigation — Zone {zone_index} of {total_zones}",
-        "description": "Configure irrigation zone {zone_index}. Zone geometry (polygon) is drawn later in the Lovelace card.",
+        "description": "Zone geometry is drawn on the map in the card later.\n\nKc presets: {kc_hint}\nIf you select Custom, enter your Kc value in the field below.",
         "data": {
           "name": "Zone name",
-          "mm_per_min": "Water flow rate (mm/min)",
-          "threshold_mm": "Irrigation threshold (mm deficit)",
-          "kc": "Crop coefficient (Kc)",
-          "switch_entity": "Switch entity (optional)"
+          "kc_preset": "Grass / plant type",
+          "kc_custom": "Custom Kc value (used only if 'Custom' is selected above)",
+          "switch_entity": "Switch / script entity (optional)"
         }
       },
       "et0": {
         "title": "Solar Irrigation — ET0 Source",
-        "description": "Select how to obtain the daily reference evapotranspiration (ET0).",
+        "description": "ET0 is the daily reference evapotranspiration. Use 'Fixed' for a simple setup, 'Weather' to auto-calculate from your weather entity.",
         "data": {
           "et0_mode": "ET0 source",
-          "et0_fixed": "Fixed ET0 value (mm/day)",
-          "et0_entity": "ET0 sensor or weather entity"
+          "et0_fixed": "Fixed ET0 (mm/day)",
+          "et0_entity": "Weather or ET0 sensor entity ID"
         }
       },
       "calc_opts": {
         "title": "Solar Irrigation — Calculation Options",
-        "description": "Advanced shadow calculation options.",
         "data": {
-          "irradiance_weighted": "Weight by solar irradiance (sin²·⁵ elevation)",
-          "use_dst": "Apply DST correction (UTC+2, Apr–Oct)"
+          "irradiance_weighted": "Weight shadow by solar irradiance (sin²·⁵ elevation) — more accurate",
+          "use_dst": "Apply DST correction (UTC+2, Apr–Oct for Italy/CET)"
         }
       }
     },
     "error": {
-      "invalid_json": "Invalid JSON format. Please check the syntax."
+      "invalid_json": "Invalid JSON — please check the syntax."
     },
     "abort": {
       "already_configured": "Solar Irrigation is already configured."
@@ -52,13 +52,16 @@
     "step": {
       "init": {
         "title": "Solar Irrigation — Settings",
+        "description": "Zones and buildings can be edited as JSON below for advanced users.",
         "data": {
           "latitude": "Latitude",
           "longitude": "Longitude",
-          "north_offset": "North offset (degrees)",
+          "north_offset": "North offset (°)",
+          "mm_per_min": "Default flow rate (mm/min)",
+          "threshold_mm": "Default irrigation threshold (mm)",
           "et0_mode": "ET0 source",
           "et0_fixed": "Fixed ET0 (mm/day)",
-          "et0_entity": "ET0/weather entity",
+          "et0_entity": "Weather / ET0 entity",
           "irradiance_weighted": "Weight by solar irradiance",
           "use_dst": "Apply DST correction",
           "zones": "Zones JSON (advanced)",
@@ -67,7 +70,7 @@
       }
     },
     "error": {
-      "invalid_json": "Invalid JSON format."
+      "invalid_json": "Invalid JSON."
     }
   }
 }

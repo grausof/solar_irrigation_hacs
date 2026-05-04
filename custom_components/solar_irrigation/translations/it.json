@@ -2,47 +2,47 @@
   "config": {
     "step": {
       "user": {
-        "title": "Solar Irrigation — Posizione e Zone",
-        "description": "Inserisci la posizione del giardino (usa automaticamente le coordinate di HA). Edifici e geometria delle zone si configurano dopo dalla card Lovelace.",
+        "title": "Solar Irrigation — Posizione e Setup",
+        "description": "La posizione usa le coordinate di HA. Edifici e geometria delle zone si disegnano poi dalla card Lovelace.",
         "data": {
           "name": "Nome installazione",
           "latitude": "Latitudine",
           "longitude": "Longitudine",
-          "north_offset": "Offset nord (gradi, 0 = asse Y della mappa punta a Nord)",
-          "num_zones": "Numero di zone di irrigazione"
+          "north_offset": "Offset nord (°, 0 = asse Y punta a Nord)",
+          "num_zones": "Numero di zone di irrigazione (1–10)",
+          "mm_per_min": "Portata predefinita (mm/min) — vale per tutte le zone",
+          "threshold_mm": "Soglia irrigazione predefinita (mm di deficit)"
         }
       },
       "zone": {
         "title": "Solar Irrigation — Zona {zone_index} di {total_zones}",
-        "description": "Configura la zona di irrigazione {zone_index}. La geometria (poligono) si disegna nella card Lovelace.",
+        "description": "La geometria della zona si disegna sulla mappa nella card.\n\nPreset Kc: {kc_hint}\nSe selezioni Personalizzato, inserisci il tuo valore Kc nel campo sotto.",
         "data": {
           "name": "Nome zona",
-          "mm_per_min": "Portata acqua (mm/min)",
-          "threshold_mm": "Soglia irrigazione (mm di deficit)",
-          "kc": "Coefficiente colturale (Kc)",
-          "switch_entity": "Entità switch (opzionale, es. switch.irrigazione_zona_1)"
+          "kc_preset": "Tipo di erba / pianta",
+          "kc_custom": "Valore Kc personalizzato (usato solo se 'Personalizzato' è selezionato)",
+          "switch_entity": "Entità switch / script (opzionale)"
         }
       },
       "et0": {
         "title": "Solar Irrigation — Fonte ET0",
-        "description": "Seleziona come ottenere l'evapotraspirazione giornaliera di riferimento (ET0).",
+        "description": "ET0 è l'evapotraspirazione giornaliera di riferimento. Usa 'Fisso' per una configurazione semplice, 'Meteo' per calcolarla automaticamente dalla tua entità meteo.",
         "data": {
           "et0_mode": "Fonte ET0",
-          "et0_fixed": "Valore ET0 fisso (mm/giorno)",
-          "et0_entity": "Sensore ET0 o entità meteo"
+          "et0_fixed": "ET0 fisso (mm/giorno)",
+          "et0_entity": "Entità meteo o sensore ET0"
         }
       },
       "calc_opts": {
-        "title": "Solar Irrigation — Opzioni di calcolo",
-        "description": "Opzioni avanzate per il calcolo dell'ombra.",
+        "title": "Solar Irrigation — Opzioni di Calcolo",
         "data": {
-          "irradiance_weighted": "Pondera per irradianza solare (sin²·⁵ elevazione) — fisicamente più accurato",
+          "irradiance_weighted": "Pondera l'ombra per irradianza solare (sin²·⁵ elevazione) — più accurato",
           "use_dst": "Applica correzione ora legale (UTC+2, apr–ott)"
         }
       }
     },
     "error": {
-      "invalid_json": "Formato JSON non valido. Controlla la sintassi."
+      "invalid_json": "JSON non valido — controlla la sintassi."
     },
     "abort": {
       "already_configured": "Solar Irrigation è già configurato."
@@ -52,14 +52,16 @@
     "step": {
       "init": {
         "title": "Solar Irrigation — Impostazioni",
-        "description": "Le zone e gli edifici possono essere modificati come JSON per utenti avanzati.",
+        "description": "Zone ed edifici possono essere modificati come JSON per utenti avanzati.",
         "data": {
           "latitude": "Latitudine",
           "longitude": "Longitudine",
-          "north_offset": "Offset nord (gradi)",
+          "north_offset": "Offset nord (°)",
+          "mm_per_min": "Portata predefinita (mm/min)",
+          "threshold_mm": "Soglia irrigazione predefinita (mm)",
           "et0_mode": "Fonte ET0",
           "et0_fixed": "ET0 fisso (mm/giorno)",
-          "et0_entity": "Entità ET0/meteo",
+          "et0_entity": "Entità meteo / ET0",
           "irradiance_weighted": "Pondera per irradianza solare",
           "use_dst": "Applica correzione ora legale",
           "zones": "JSON zone (avanzato)",
@@ -68,7 +70,7 @@
       }
     },
     "error": {
-      "invalid_json": "Formato JSON non valido."
+      "invalid_json": "JSON non valido."
     }
   }
 }
