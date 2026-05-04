@@ -6,6 +6,7 @@ from pathlib import Path
 
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
@@ -21,17 +22,24 @@ CARD_PATH = Path(__file__).parent / "www" / "solar-irrigation-card.js"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Serve the Lovelace card JS and auto-register it as a Lovelace resource."""
-    # 1. Serve the JS file as a static HTTP path
+    """Serve the Lovelace card JS and schedule its Lovelace resource registration."""
+    # Serve the JS file as a static HTTP path
     await hass.http.async_register_static_paths([
         StaticPathConfig(CARD_URL, str(CARD_PATH), cache_headers=False)
     ])
     _LOGGER.debug("Serving Solar Irrigation card at %s", CARD_URL)
 
-    # 2. Auto-register in Lovelace resources (storage mode only).
-    #    This is a best-effort operation: if it fails (YAML mode, not yet loaded,
-    #    etc.) we log a debug message and the user can add it manually.
-    hass.async_create_task(_async_ensure_lovelace_resource(hass))
+    # Register the Lovelace resource after HA is fully started so that
+    # hass.data["lovelace"] is guaranteed to be populated.
+    async def _on_started(_event=None) -> None:
+        await _async_ensure_lovelace_resource(hass)
+
+    if hass.is_running:
+        # HA already running (e.g. integration reloaded) — register immediately
+        hass.async_create_task(_on_started())
+    else:
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _on_started)
+
     return True
 
 
@@ -40,40 +48,45 @@ async def _async_ensure_lovelace_resource(hass: HomeAssistant) -> None:
 
     Works only when Lovelace is in storage mode (the default).
     Safe to call repeatedly — checks for duplicates before inserting.
+    On success the user only needs a browser refresh (F5).
     """
     resource_url = f"{CARD_URL}?v={CARD_VERSION}"
     try:
         lovelace = hass.data.get("lovelace")
         if lovelace is None:
-            _LOGGER.debug("Lovelace not in hass.data yet — skipping auto-resource registration")
+            _LOGGER.debug("Lovelace not found in hass.data — resource must be added manually")
             return
 
         resources = lovelace.get("resources")
         if resources is None:
-            _LOGGER.debug("Lovelace resources not available (YAML mode?) — add resource manually")
+            _LOGGER.debug(
+                "Lovelace running in YAML mode — add the resource manually: "
+                "Settings → Dashboards → Resources → %s (JavaScript module)",
+                resource_url,
+            )
             return
 
-        # Load current resources
         if hasattr(resources, "async_load"):
             await resources.async_load()
 
-        # Check if already registered (any version)
+        # Avoid duplicates across restarts / version changes
         existing = [item.get("url", "") for item in resources.async_items()]
         if any(CARD_URL in u for u in existing):
-            _LOGGER.debug("Solar Irrigation card already registered in Lovelace resources")
+            _LOGGER.debug("Solar Irrigation card already in Lovelace resources — skipping")
             return
 
         await resources.async_create_item({"res_type": "module", "url": resource_url})
         _LOGGER.info(
-            "Solar Irrigation: auto-registered Lovelace resource %s — "
-            "you may need to refresh your browser (F5).",
+            "Solar Irrigation: Lovelace resource registered (%s). "
+            "Please do a hard refresh (Ctrl+Shift+R / Cmd+Shift+R) in your browser.",
             resource_url,
         )
+
     except Exception as err:  # noqa: BLE001
-        _LOGGER.debug(
-            "Could not auto-register Lovelace resource (%s). "
-            "Add it manually: Settings → Dashboards → Resources → Add resource → "
-            "URL: %s, Type: JavaScript module",
+        _LOGGER.warning(
+            "Could not auto-register Lovelace resource: %s. "
+            "Add it manually: Settings → Dashboards → Resources → "
+            "URL: %s  Type: JavaScript module",
             err,
             resource_url,
         )
