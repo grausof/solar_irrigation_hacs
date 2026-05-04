@@ -2,44 +2,42 @@
   "config": {
     "step": {
       "user": {
-        "title": "Solar Irrigation — Posizione",
-        "description": "Inserisci la posizione geografica e l'orientamento del tuo giardino.",
+        "title": "Solar Irrigation — Posizione e Zone",
+        "description": "Inserisci la posizione del giardino (usa automaticamente le coordinate di HA). Edifici e geometria delle zone si configurano dopo dalla card Lovelace.",
         "data": {
           "name": "Nome installazione",
           "latitude": "Latitudine",
           "longitude": "Longitudine",
-          "north_offset": "Offset nord (gradi)"
+          "north_offset": "Offset nord (gradi, 0 = asse Y della mappa punta a Nord)",
+          "num_zones": "Numero di zone di irrigazione"
         }
       },
-      "buildings": {
-        "title": "Solar Irrigation — Edifici",
-        "description": "Incolla il JSON degli edifici/ostacoli. Ogni edificio: {\"pts\":[{\"x\":0,\"y\":0},...], \"h\":3.0}. Coordinate in metri dall'origine. Lascia [] se non ci sono ostacoli.",
+      "zone": {
+        "title": "Solar Irrigation — Zona {zone_index} di {total_zones}",
+        "description": "Configura la zona di irrigazione {zone_index}. La geometria (poligono) si disegna nella card Lovelace.",
         "data": {
-          "buildings": "JSON edifici"
-        }
-      },
-      "zones": {
-        "title": "Solar Irrigation — Zone",
-        "description": "Incolla il JSON delle zone di irrigazione. Ogni zona deve avere: zone_id, name, pts (metri), e opzionalmente: switch_entity, mm_per_min, threshold_mm, kc.",
-        "data": {
-          "zones": "JSON zone"
+          "name": "Nome zona",
+          "mm_per_min": "Portata acqua (mm/min)",
+          "threshold_mm": "Soglia irrigazione (mm di deficit)",
+          "kc": "Coefficiente colturale (Kc)",
+          "switch_entity": "Entità switch (opzionale, es. switch.irrigazione_zona_1)"
         }
       },
       "et0": {
         "title": "Solar Irrigation — Fonte ET0",
-        "description": "Seleziona come ottenere l'evapotraspirazione giornaliera.",
+        "description": "Seleziona come ottenere l'evapotraspirazione giornaliera di riferimento (ET0).",
         "data": {
           "et0_mode": "Fonte ET0",
-          "et0_fixed": "ET0 fisso (mm/giorno)",
-          "et0_entity": "Entit\u00e0 sensore ET0 o entit\u00e0 meteo"
+          "et0_fixed": "Valore ET0 fisso (mm/giorno)",
+          "et0_entity": "Sensore ET0 o entità meteo"
         }
       },
-      "options": {
-        "title": "Solar Irrigation — Opzioni",
-        "description": "Opzioni avanzate di calcolo.",
+      "calc_opts": {
+        "title": "Solar Irrigation — Opzioni di calcolo",
+        "description": "Opzioni avanzate per il calcolo dell'ombra.",
         "data": {
-          "irradiance_weighted": "Pondera per irradianza solare (sin\u00b2\u00b7\u2075 elevazione)",
-          "use_dst": "Applica correzione ora legale (UTC+2, apr\u2013ott)"
+          "irradiance_weighted": "Pondera per irradianza solare (sin²·⁵ elevazione) — fisicamente più accurato",
+          "use_dst": "Applica correzione ora legale (UTC+2, apr–ott)"
         }
       }
     },
@@ -47,24 +45,25 @@
       "invalid_json": "Formato JSON non valido. Controlla la sintassi."
     },
     "abort": {
-      "already_configured": "Solar Irrigation \u00e8 gi\u00e0 configurato."
+      "already_configured": "Solar Irrigation è già configurato."
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "Solar Irrigation — Impostazioni",
+        "description": "Le zone e gli edifici possono essere modificati come JSON per utenti avanzati.",
         "data": {
           "latitude": "Latitudine",
           "longitude": "Longitudine",
           "north_offset": "Offset nord (gradi)",
           "et0_mode": "Fonte ET0",
           "et0_fixed": "ET0 fisso (mm/giorno)",
-          "et0_entity": "Entit\u00e0 ET0/meteo",
+          "et0_entity": "Entità ET0/meteo",
           "irradiance_weighted": "Pondera per irradianza solare",
           "use_dst": "Applica correzione ora legale",
-          "buildings": "JSON edifici",
-          "zones": "JSON zone"
+          "zones": "JSON zone (avanzato)",
+          "buildings": "JSON edifici (avanzato)"
         }
       }
     },

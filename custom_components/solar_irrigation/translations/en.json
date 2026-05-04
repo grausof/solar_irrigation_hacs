@@ -2,44 +2,42 @@
   "config": {
     "step": {
       "user": {
-        "title": "Solar Irrigation — Location",
-        "description": "Enter the geographic location and orientation of your garden.",
+        "title": "Solar Irrigation — Location & Zones",
+        "description": "Enter your garden location (defaults to your HA home location). Buildings and zone geometry are configured later via the Lovelace card.",
         "data": {
           "name": "Installation name",
           "latitude": "Latitude",
           "longitude": "Longitude",
-          "north_offset": "North offset (degrees)"
+          "north_offset": "North offset (degrees, 0 = map Y axis points North)",
+          "num_zones": "Number of irrigation zones"
         }
       },
-      "buildings": {
-        "title": "Solar Irrigation — Buildings",
-        "description": "Paste the JSON of buildings/obstacles. Each building: {\"pts\":[{\"x\":0,\"y\":0},...], \"h\":3.0}. Coordinates are in meters from origin. Leave [] if no obstacles.",
+      "zone": {
+        "title": "Solar Irrigation — Zone {zone_index} of {total_zones}",
+        "description": "Configure irrigation zone {zone_index}. Zone geometry (polygon) is drawn later in the Lovelace card.",
         "data": {
-          "buildings": "Buildings JSON"
-        }
-      },
-      "zones": {
-        "title": "Solar Irrigation — Zones",
-        "description": "Paste the JSON of irrigation zones. Each zone must have: zone_id, name, pts (meters), and optionally: switch_entity, mm_per_min, threshold_mm, kc.",
-        "data": {
-          "zones": "Zones JSON"
+          "name": "Zone name",
+          "mm_per_min": "Water flow rate (mm/min)",
+          "threshold_mm": "Irrigation threshold (mm deficit)",
+          "kc": "Crop coefficient (Kc)",
+          "switch_entity": "Switch entity (optional)"
         }
       },
       "et0": {
         "title": "Solar Irrigation — ET0 Source",
-        "description": "Select how to obtain the daily evapotranspiration value.",
+        "description": "Select how to obtain the daily reference evapotranspiration (ET0).",
         "data": {
           "et0_mode": "ET0 source",
           "et0_fixed": "Fixed ET0 value (mm/day)",
-          "et0_entity": "ET0 sensor entity or weather entity"
+          "et0_entity": "ET0 sensor or weather entity"
         }
       },
-      "options": {
-        "title": "Solar Irrigation — Options",
-        "description": "Advanced calculation options.",
+      "calc_opts": {
+        "title": "Solar Irrigation — Calculation Options",
+        "description": "Advanced shadow calculation options.",
         "data": {
-          "irradiance_weighted": "Weight by solar irradiance (sin\u00b2\u00b7\u2075 elevation)",
-          "use_dst": "Apply DST correction (UTC+2, Apr\u2013Oct)"
+          "irradiance_weighted": "Weight by solar irradiance (sin²·⁵ elevation)",
+          "use_dst": "Apply DST correction (UTC+2, Apr–Oct)"
         }
       }
     },
@@ -63,8 +61,8 @@
           "et0_entity": "ET0/weather entity",
           "irradiance_weighted": "Weight by solar irradiance",
           "use_dst": "Apply DST correction",
-          "buildings": "Buildings JSON",
-          "zones": "Zones JSON"
+          "zones": "Zones JSON (advanced)",
+          "buildings": "Buildings JSON (advanced)"
         }
       }
     },

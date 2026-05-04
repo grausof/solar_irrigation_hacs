@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -12,6 +13,17 @@ from .coordinator import SolarIrrigationCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["sensor", "binary_sensor", "number"]
+
+# URL at which the Lovelace card JS is served
+CARD_URL = f"/{DOMAIN}/solar-irrigation-card.js"
+CARD_PATH = Path(__file__).parent / "www" / "solar-irrigation-card.js"
+
+
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Register the Lovelace card as a static HTTP resource."""
+    hass.http.register_static_path(CARD_URL, str(CARD_PATH), cache_headers=False)
+    _LOGGER.debug("Registered Solar Irrigation card at %s", CARD_URL)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
