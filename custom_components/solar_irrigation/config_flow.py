@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 from typing import Any
 
 import voluptuous as vol
@@ -32,15 +31,6 @@ ZONE_COLORS = [
 ]
 
 
-def _slugify(name: str) -> str:
-    slug = name.lower().strip()
-    for src, dst in [("àáâãäå", "a"), ("èéêë", "e"), ("ìíîï", "i"), ("òóôõö", "o"), ("ùúûü", "u")]:
-        for ch in src:
-            slug = slug.replace(ch, dst)
-    slug = re.sub(r"[^a-z0-9]+", "_", slug)
-    return slug.strip("_") or "zone"
-
-
 def _kc_from_input(preset: str, custom_val: float) -> float:
     if preset in KC_PRESETS and KC_PRESETS[preset][2] is not None:
         return KC_PRESETS[preset][2]
@@ -48,28 +38,21 @@ def _kc_from_input(preset: str, custom_val: float) -> float:
 
 
 class SolarIrrigationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Solar Irrigation.
-
-    Steps:
-      1. user      → name, lat/lon, north_offset, num_zones, global mm_per_min + threshold
-      2. zone (x N) → zone name + Kc preset or custom + optional switch entity
-      3. et0       → ET0 source
-      4. calc_opts → weighting, DST
-    Buildings and zone geometry are configured later in the Lovelace card.
+    """Config flow — 3 steps:
+      1. setup   → name, lat/lon, num_zones, flow rate, threshold, Kc preset
+      2. et0     → ET0 source
+      3. calc_opts → weighting, DST
+    Zones are auto-named (Zone 1, Zone 2, …). Everything else is editable later.
     """
 
     VERSION = 1
 
     def __init__(self) -> None:
         self._data: dict[str, Any] = {}
-        self._num_zones: int = 1
-        self._current_zone: int = 0
-        self._zones: list[dict] = []
-        self._global_mm_per_min: float = DEFAULT_MM_PER_MIN
-        self._global_threshold: float = DEFAULT_THRESHOLD_MM
+
+    # ── Step 1: everything global ──────────────────────────────────────────
 
     async def async_step_user(self, user_input=None) -> FlowResult:
-        """Step 1: location, global irrigation params, zone count."""
         default_lat = round(self.hass.config.latitude, 5)
         default_lon = round(self.hass.config.longitude, 5)
 
@@ -81,78 +64,54 @@ class SolarIrrigationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("num_zones", default=1): vol.All(vol.Coerce(int), vol.Range(min=1, max=10)),
             vol.Required(CONF_MM_PER_MIN, default=DEFAULT_MM_PER_MIN): vol.Coerce(float),
             vol.Required(CONF_THRESHOLD_MM, default=DEFAULT_THRESHOLD_MM): vol.Coerce(float),
+            vol.Required("kc_preset", default="bermuda"): vol.In(KC_PRESET_KEYS),
+            vol.Optional("kc_custom", default=DEFAULT_KC): vol.Coerce(float),
         })
 
         if user_input is not None:
-            self._global_mm_per_min = user_input[CONF_MM_PER_MIN]
-            self._global_threshold = user_input[CONF_THRESHOLD_MM]
+            kc = _kc_from_input(user_input["kc_preset"], user_input.get("kc_custom", DEFAULT_KC))
+            num_zones = user_input["num_zones"]
+            zones = [
+                {
+                    ZONE_ID: f"zone_{i + 1}",
+                    ZONE_NAME: f"Zone {i + 1}",
+                    ZONE_KC: kc,
+                    ZONE_MM_PER_MIN: user_input[CONF_MM_PER_MIN],
+                    ZONE_THRESHOLD_MM: user_input[CONF_THRESHOLD_MM],
+                    "switch_entity": "",
+                    "color": ZONE_COLORS[i % len(ZONE_COLORS)],
+                    "pts": [],
+                }
+                for i in range(num_zones)
+            ]
             self._data.update({
                 "name": user_input["name"],
                 CONF_LAT: user_input[CONF_LAT],
                 CONF_LON: user_input[CONF_LON],
                 CONF_NORTH_OFFSET: user_input[CONF_NORTH_OFFSET],
-                CONF_MM_PER_MIN: self._global_mm_per_min,
-                CONF_THRESHOLD_MM: self._global_threshold,
+                CONF_MM_PER_MIN: user_input[CONF_MM_PER_MIN],
+                CONF_THRESHOLD_MM: user_input[CONF_THRESHOLD_MM],
                 CONF_BUILDINGS: [],
+                CONF_ZONES: zones,
             })
-            self._num_zones = user_input["num_zones"]
-            self._current_zone = 0
-            self._zones = []
-            return await self.async_step_zone()
-
-        return self.async_show_form(
-            step_id="user",
-            data_schema=schema,
-            description_placeholders={"ha_lat": str(default_lat), "ha_lon": str(default_lon)},
-        )
-
-    async def async_step_zone(self, user_input=None) -> FlowResult:
-        """Step 2 (repeated): configure each irrigation zone."""
-        idx = self._current_zone
-
-        schema = vol.Schema({
-            vol.Required(ZONE_NAME, default=f"Zone {idx + 1}"): str,
-            vol.Required("kc_preset", default="bermuda"): vol.In(KC_PRESET_KEYS),
-            # shown only when kc_preset == "custom"; always present to keep schema simple
-            vol.Optional("kc_custom", default=DEFAULT_KC): vol.Coerce(float),
-            vol.Optional("switch_entity", default=""): str,
-        })
-
-        if user_input is not None:
-            zone_name = user_input[ZONE_NAME]
-            kc = _kc_from_input(user_input["kc_preset"], user_input.get("kc_custom", DEFAULT_KC))
-            zone_id = f"zone_{_slugify(zone_name)}_{idx}"
-            self._zones.append({
-                ZONE_ID: zone_id,
-                ZONE_NAME: zone_name,
-                ZONE_KC: kc,
-                ZONE_MM_PER_MIN: self._global_mm_per_min,
-                ZONE_THRESHOLD_MM: self._global_threshold,
-                "switch_entity": user_input.get("switch_entity", ""),
-                "color": ZONE_COLORS[idx % len(ZONE_COLORS)],
-                "pts": [],
-            })
-            self._current_zone += 1
-            if self._current_zone < self._num_zones:
-                return await self.async_step_zone()
-            self._data[CONF_ZONES] = self._zones
             return await self.async_step_et0()
 
         kc_hint = " | ".join(
             f"{k}: {v[2]}" for k, v in KC_PRESETS.items() if v[2] is not None
         )
         return self.async_show_form(
-            step_id="zone",
+            step_id="user",
             data_schema=schema,
             description_placeholders={
-                "zone_index": str(idx + 1),
-                "total_zones": str(self._num_zones),
+                "ha_lat": str(default_lat),
+                "ha_lon": str(default_lon),
                 "kc_hint": kc_hint,
             },
         )
 
+    # ── Step 2: ET0 source ─────────────────────────────────────────────────
+
     async def async_step_et0(self, user_input=None) -> FlowResult:
-        """Step 3: ET0 source selection."""
         schema = vol.Schema({
             vol.Required(CONF_ET0_MODE, default=ET0_MODE_FIXED): vol.In(
                 [ET0_MODE_FIXED, ET0_MODE_ENTITY, ET0_MODE_WEATHER]
@@ -165,8 +124,9 @@ class SolarIrrigationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_calc_opts()
         return self.async_show_form(step_id="et0", data_schema=schema)
 
+    # ── Step 3: calculation options ────────────────────────────────────────
+
     async def async_step_calc_opts(self, user_input=None) -> FlowResult:
-        """Step 4: advanced calculation options."""
         schema = vol.Schema({
             vol.Optional(CONF_WEIGHTED, default=DEFAULT_WEIGHTED): bool,
             vol.Optional(CONF_USE_DST, default=DEFAULT_USE_DST): bool,
@@ -184,7 +144,7 @@ class SolarIrrigationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class SolarIrrigationOptionsFlow(config_entries.OptionsFlow):
-    """Options flow: edit global settings + advanced JSON for zones/buildings."""
+    """Options: edit all global params + advanced JSON for zones/buildings."""
 
     def __init__(self, config_entry) -> None:
         self._config_entry = config_entry

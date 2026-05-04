@@ -15,18 +15,68 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["sensor", "binary_sensor", "number"]
 
-# URL at which the Lovelace card JS is served
 CARD_URL = f"/{DOMAIN}/solar-irrigation-card.js"
+CARD_VERSION = "0.1.0"
 CARD_PATH = Path(__file__).parent / "www" / "solar-irrigation-card.js"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Register the Lovelace card as a static HTTP resource."""
+    """Serve the Lovelace card JS and auto-register it as a Lovelace resource."""
+    # 1. Serve the JS file as a static HTTP path
     await hass.http.async_register_static_paths([
         StaticPathConfig(CARD_URL, str(CARD_PATH), cache_headers=False)
     ])
-    _LOGGER.debug("Registered Solar Irrigation card at %s", CARD_URL)
+    _LOGGER.debug("Serving Solar Irrigation card at %s", CARD_URL)
+
+    # 2. Auto-register in Lovelace resources (storage mode only).
+    #    This is a best-effort operation: if it fails (YAML mode, not yet loaded,
+    #    etc.) we log a debug message and the user can add it manually.
+    hass.async_create_task(_async_ensure_lovelace_resource(hass))
     return True
+
+
+async def _async_ensure_lovelace_resource(hass: HomeAssistant) -> None:
+    """Add the card JS to Lovelace resources if not already present.
+
+    Works only when Lovelace is in storage mode (the default).
+    Safe to call repeatedly — checks for duplicates before inserting.
+    """
+    resource_url = f"{CARD_URL}?v={CARD_VERSION}"
+    try:
+        lovelace = hass.data.get("lovelace")
+        if lovelace is None:
+            _LOGGER.debug("Lovelace not in hass.data yet — skipping auto-resource registration")
+            return
+
+        resources = lovelace.get("resources")
+        if resources is None:
+            _LOGGER.debug("Lovelace resources not available (YAML mode?) — add resource manually")
+            return
+
+        # Load current resources
+        if hasattr(resources, "async_load"):
+            await resources.async_load()
+
+        # Check if already registered (any version)
+        existing = [item.get("url", "") for item in resources.async_items()]
+        if any(CARD_URL in u for u in existing):
+            _LOGGER.debug("Solar Irrigation card already registered in Lovelace resources")
+            return
+
+        await resources.async_create_item({"res_type": "module", "url": resource_url})
+        _LOGGER.info(
+            "Solar Irrigation: auto-registered Lovelace resource %s — "
+            "you may need to refresh your browser (F5).",
+            resource_url,
+        )
+    except Exception as err:  # noqa: BLE001
+        _LOGGER.debug(
+            "Could not auto-register Lovelace resource (%s). "
+            "Add it manually: Settings → Dashboards → Resources → Add resource → "
+            "URL: %s, Type: JavaScript module",
+            err,
+            resource_url,
+        )
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

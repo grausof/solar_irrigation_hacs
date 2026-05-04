@@ -2,31 +2,23 @@
   "config": {
     "step": {
       "user": {
-        "title": "Solar Irrigation — Posizione e Setup",
-        "description": "La posizione usa le coordinate di HA. Edifici e geometria delle zone si disegnano poi dalla card Lovelace.",
+        "title": "Solar Irrigation — Setup",
+        "description": "La posizione usa le coordinate di HA. Nomi e geometria delle zone si configurano dalla card Lovelace.\n\nPreset Kc: {kc_hint}",
         "data": {
           "name": "Nome installazione",
           "latitude": "Latitudine",
           "longitude": "Longitudine",
-          "north_offset": "Offset nord (°, 0 = asse Y punta a Nord)",
+          "north_offset": "Offset nord (°)",
           "num_zones": "Numero di zone di irrigazione (1–10)",
-          "mm_per_min": "Portata predefinita (mm/min) — vale per tutte le zone",
-          "threshold_mm": "Soglia irrigazione predefinita (mm di deficit)"
-        }
-      },
-      "zone": {
-        "title": "Solar Irrigation — Zona {zone_index} di {total_zones}",
-        "description": "La geometria della zona si disegna sulla mappa nella card.\n\nPreset Kc: {kc_hint}\nSe selezioni Personalizzato, inserisci il tuo valore Kc nel campo sotto.",
-        "data": {
-          "name": "Nome zona",
-          "kc_preset": "Tipo di erba / pianta",
-          "kc_custom": "Valore Kc personalizzato (usato solo se 'Personalizzato' è selezionato)",
-          "switch_entity": "Entità switch / script (opzionale)"
+          "mm_per_min": "Portata (mm/min) — uguale per tutte le zone",
+          "threshold_mm": "Soglia irrigazione (mm deficit) — uguale per tutte le zone",
+          "kc_preset": "Tipo di erba / pianta — uguale per tutte le zone",
+          "kc_custom": "Kc personalizzato (solo se 'Personalizzato' selezionato)"
         }
       },
       "et0": {
         "title": "Solar Irrigation — Fonte ET0",
-        "description": "ET0 è l'evapotraspirazione giornaliera di riferimento. Usa 'Fisso' per una configurazione semplice, 'Meteo' per calcolarla automaticamente dalla tua entità meteo.",
+        "description": "ET0 è l'evapotraspirazione di riferimento giornaliera. 'Fisso' è il metodo più semplice; 'Meteo' la calcola automaticamente dall'entità meteo.",
         "data": {
           "et0_mode": "Fonte ET0",
           "et0_fixed": "ET0 fisso (mm/giorno)",
@@ -52,13 +44,13 @@
     "step": {
       "init": {
         "title": "Solar Irrigation — Impostazioni",
-        "description": "Zone ed edifici possono essere modificati come JSON per utenti avanzati.",
+        "description": "Zone ed edifici modificabili come JSON per utenti avanzati.",
         "data": {
           "latitude": "Latitudine",
           "longitude": "Longitudine",
           "north_offset": "Offset nord (°)",
-          "mm_per_min": "Portata predefinita (mm/min)",
-          "threshold_mm": "Soglia irrigazione predefinita (mm)",
+          "mm_per_min": "Portata (mm/min)",
+          "threshold_mm": "Soglia irrigazione (mm)",
           "et0_mode": "Fonte ET0",
           "et0_fixed": "ET0 fisso (mm/giorno)",
           "et0_entity": "Entità meteo / ET0",

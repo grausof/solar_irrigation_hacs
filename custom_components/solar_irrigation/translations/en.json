@@ -2,42 +2,34 @@
   "config": {
     "step": {
       "user": {
-        "title": "Solar Irrigation — Location & Setup",
-        "description": "Location defaults to your HA home. Buildings and zone geometry are drawn later in the Lovelace card.",
+        "title": "Solar Irrigation — Setup",
+        "description": "Location defaults to your HA home. Zone names and geometry are configured later in the Lovelace card.\n\nKc presets: {kc_hint}",
         "data": {
           "name": "Installation name",
           "latitude": "Latitude",
           "longitude": "Longitude",
-          "north_offset": "North offset (°, 0 = Y axis points North)",
+          "north_offset": "North offset (°)",
           "num_zones": "Number of irrigation zones (1–10)",
-          "mm_per_min": "Default flow rate (mm/min) — applies to all zones",
-          "threshold_mm": "Default irrigation threshold (mm deficit)"
-        }
-      },
-      "zone": {
-        "title": "Solar Irrigation — Zone {zone_index} of {total_zones}",
-        "description": "Zone geometry is drawn on the map in the card later.\n\nKc presets: {kc_hint}\nIf you select Custom, enter your Kc value in the field below.",
-        "data": {
-          "name": "Zone name",
-          "kc_preset": "Grass / plant type",
-          "kc_custom": "Custom Kc value (used only if 'Custom' is selected above)",
-          "switch_entity": "Switch / script entity (optional)"
+          "mm_per_min": "Flow rate (mm/min) — same for all zones",
+          "threshold_mm": "Irrigation threshold (mm deficit) — same for all zones",
+          "kc_preset": "Grass / plant type — same for all zones",
+          "kc_custom": "Custom Kc (only if 'Custom' selected above)"
         }
       },
       "et0": {
         "title": "Solar Irrigation — ET0 Source",
-        "description": "ET0 is the daily reference evapotranspiration. Use 'Fixed' for a simple setup, 'Weather' to auto-calculate from your weather entity.",
+        "description": "ET0 is the daily reference evapotranspiration. 'Fixed' is simplest; 'Weather' auto-calculates from your weather entity.",
         "data": {
           "et0_mode": "ET0 source",
           "et0_fixed": "Fixed ET0 (mm/day)",
-          "et0_entity": "Weather or ET0 sensor entity ID"
+          "et0_entity": "Weather or ET0 sensor entity"
         }
       },
       "calc_opts": {
         "title": "Solar Irrigation — Calculation Options",
         "data": {
           "irradiance_weighted": "Weight shadow by solar irradiance (sin²·⁵ elevation) — more accurate",
-          "use_dst": "Apply DST correction (UTC+2, Apr–Oct for Italy/CET)"
+          "use_dst": "Apply DST correction (UTC+2, Apr–Oct)"
         }
       }
     },
@@ -52,13 +44,13 @@
     "step": {
       "init": {
         "title": "Solar Irrigation — Settings",
-        "description": "Zones and buildings can be edited as JSON below for advanced users.",
+        "description": "Zones and buildings can be edited as JSON for advanced users.",
         "data": {
           "latitude": "Latitude",
           "longitude": "Longitude",
           "north_offset": "North offset (°)",
-          "mm_per_min": "Default flow rate (mm/min)",
-          "threshold_mm": "Default irrigation threshold (mm)",
+          "mm_per_min": "Flow rate (mm/min)",
+          "threshold_mm": "Irrigation threshold (mm)",
           "et0_mode": "ET0 source",
           "et0_fixed": "Fixed ET0 (mm/day)",
           "et0_entity": "Weather / ET0 entity",
